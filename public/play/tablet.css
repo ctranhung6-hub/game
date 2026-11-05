@@ -1,0 +1,160 @@
+/* The student's entire viewport is the game; teacher tools stay on the teacher URL. */
+.student-view{margin:0;width:100%;height:100dvh;overflow:hidden;overscroll-behavior:none;background:#c9dfca;-webkit-user-select:none;user-select:none}
+.student-view header,.student-view .intro,.student-view #room-bar,.student-view aside,.student-view footer,.student-view .key-hint,.student-view #prompt,.student-view .joystick-wrap>span,.student-view .scene-top .live{display:none!important}
+.student-view main{padding:0;margin:0;width:100%;max-width:none;height:100dvh}
+.student-view .workspace{display:block;width:100%;height:100%}
+.student-view .game,.student-view.in-room .workspace .game{width:100%;height:100dvh;min-height:0;border:0;border-radius:0;overflow:hidden}
+.student-view #scene{top:var(--question-space,0px);bottom:0}
+.student-view #question-panel{position:absolute;left:max(10px,env(safe-area-inset-left));right:max(10px,env(safe-area-inset-right));top:max(8px,env(safe-area-inset-top));z-index:4;margin:0;padding:11px 17px;border-radius:14px;background:#fffef7f2;backdrop-filter:blur(8px);max-height:34dvh;overflow-y:auto;touch-action:pan-y;box-shadow:0 3px 15px #36563b12}
+.student-view .question-meta{font-size:10px;margin-bottom:4px;line-height:1.3}
+.student-view #question-content{font-size:clamp(12px,1.7vw,18px);line-height:1.55;padding-right:5px}
+.student-view #answers{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:7px}
+.student-view .answer{padding:5px 9px;gap:7px;background:#edf2e6}
+.student-view .answer>b{padding:4px 7px;font-size:11px}
+.student-view .answer>span{font-size:clamp(11px,1.5vw,16px);line-height:1.4}
+.student-view #result-panel{font-size:11px;margin-top:7px;padding-top:7px}
+.student-view #explanation{font-size:12px;margin-top:4px;line-height:1.5}
+.student-view .scene-top{inset:calc(var(--question-space,0px) + 12px) auto auto max(16px,env(safe-area-inset-left));z-index:3}
+.student-view .team{display:flex;gap:7px;align-items:center;font-size:11px;padding:9px 13px;background:#fffef4db}
+.student-view #score-hud{font-size:10px;color:#688057;border-left:1px solid #ccd8be;padding-left:8px}
+.student-view .control-deck{padding:18px max(22px,env(safe-area-inset-right)) 16px max(22px,env(safe-area-inset-left));background:none;z-index:5;align-items:flex-end}
+.student-view #joystick{height:128px;width:128px;background:#f6ffedba;border:2px solid #ffffffc9}
+.student-view #knob{width:58px;height:58px;left:33px;top:33px}
+.student-view .actions{gap:17px;padding-bottom:13px;align-items:flex-end}
+.student-view .actions button{height:88px;width:88px;border-radius:28px;touch-action:manipulation;box-shadow:0 5px 0 #be9455,0 4px 18px #304a2f18}
+.student-view .actions b{font-size:11px}.student-view .action-icon{font-size:30px}.student-view .actions small{font-size:9px;top:8px;right:10px}
+.student-view #bump{background:#eaa285;color:#713e32;box-shadow:0 5px 0 #bb846b}
+.student-view .bag{left:max(25px,env(safe-area-inset-left));bottom:163px;min-width:105px;padding:9px 13px;background:#fffdf0d6;z-index:3}
+.student-view .bag strong{font-size:12px}.student-view .bag>span{font-size:8px}
+.screen-tools{position:absolute;right:max(16px,env(safe-area-inset-right));top:calc(var(--question-space,0px) + 10px);display:flex;gap:9px;z-index:5}
+.screen-tools button{border:1px solid #ffffffb0;background:#fffdf0c9;color:#54704a;width:44px;height:44px;border-radius:14px;font-size:23px;display:grid;place-items:center}
+#play-status:empty{display:none}#play-status{position:absolute;top:48%;left:50%;transform:translate(-50%,-50%);background:#faffedeb;color:#46653c;padding:16px 25px;border-radius:18px;font-size:17px;font-weight:600;text-align:center;z-index:4;pointer-events:none;box-shadow:0 6px 20px #45654015}
+.student-view .toast{top:auto;bottom:25px;max-width:45%;white-space:normal;font-size:11px;z-index:6}
+.student-view #room-dialog{max-width:430px;width:90%;padding:30px;max-height:90dvh;user-select:text}
+.student-view #close-room,.teacher-view:not(.in-room) #close-room{display:none}
+.teacher-view #room-dialog{max-width:1000px}
+.teacher-view:not(.in-room) main{display:none}
+.teacher-view:not(.in-room) #room-dialog{width:min(1000px,94vw)}
+.teacher-view #play-status,.teacher-view #score-hud{display:none}
+/* A9 landscape-sized viewports, including browser chrome and Android display scaling. */
+@media(orientation:landscape) and (max-height:650px){.student-view #question-panel{max-height:35dvh;padding:9px 14px}.student-view #question-content{font-size:14px}.student-view #joystick{width:112px;height:112px}.student-view #knob{width:52px;height:52px;left:28px;top:28px}.student-view .actions button{width:78px;height:78px;border-radius:25px}.student-view .bag{bottom:143px}.student-view .actions{padding-bottom:10px}.student-view #room-dialog{padding:20px 28px}.student-view #join-form{margin:10px auto}.student-view #room-dialog h2{font-size:21px}.student-view .control-deck{padding-bottom:14px}}
+@media(orientation:portrait){.student-view #answers{grid-template-columns:1fr 1fr}.student-view #question-panel{max-height:39dvh}.student-view #question-content{font-size:13px}.student-view #joystick{width:104px;height:104px}.student-view #knob{width:49px;height:49px;left:25.5px;top:25.5px}.student-view .actions button{width:67px;height:67px;border-radius:21px}.student-view .actions{gap:9px}.student-view .control-deck{padding:18px 15px}.student-view .bag{bottom:141px}.student-view .toast{bottom:185px;max-width:90%}}
+/* Auto-sized question cards: wrap prose, fit mathematical expressions, never scroll. */
+.student-view #question-panel{max-height:none;overflow:visible;touch-action:auto}
+.student-view #question-content{font-size:var(--question-font,18px);line-height:1.4;overflow-wrap:anywhere}
+.student-view .answer{align-items:center;min-width:0;height:auto;overflow:visible;padding:6px 10px}
+.student-view .answer>span{font-size:var(--answer-font,16px);white-space:normal;overflow:visible;overflow-wrap:anywhere;word-break:normal;min-width:0}
+.student-view .answer .katex-display,.student-view #question-content .katex-display{overflow:visible;margin:2px 0}
+#teacher-hud{position:absolute;left:18px;right:120px;top:calc(var(--question-space,0px) + 12px);z-index:6;display:flex;align-items:center;gap:10px;background:#fffdf1e8;border:1px solid #fff;padding:11px 15px;border-radius:14px;max-width:800px;box-shadow:0 3px 15px #38563710}
+#teacher-hud>div{flex:1;display:flex;flex-direction:column;gap:4px;font-size:10px}#teacher-room-label{font-size:12px}#teacher-progress{color:#7d8d6b}
+#teacher-hud button,#summary-restart{padding:10px 15px;min-height:42px;border-radius:10px;border:1px solid #cddbbd;background:#eff5e7;color:#365d40;font-size:12px}
+#teacher-hud #start-match,#summary-restart{background:#2e6749;color:#fff;border:0}
+.spectator-view .scene-top,.spectator-view .bag,.spectator-view .control-deck{display:none!important}
+.spectator-view .workspace .game{height:100dvh}
+#summary-overlay{position:absolute;inset:0;z-index:30;background:#f5f7ecf7;backdrop-filter:blur(8px);display:grid;place-items:center;padding:20px}
+.summary-card{width:min(820px,100%);text-align:center;color:#31533b}.summary-card h1{font-size:clamp(19px,3.2vw,34px);margin:12px 0;overflow-wrap:anywhere}.summary-card>p{font-size:12px;color:#7d8d71;margin-bottom:20px}
+.summary-card table{width:100%;border-spacing:0;border:1px solid #d5dfc8;border-radius:16px;overflow:hidden;text-align:left;background:#fffef7}.summary-card th{padding:12px 16px;font-size:10px;background:#e7eedb;color:#6e815b;letter-spacing:.5px}.summary-card td{padding:12px 16px;border-top:1px solid #e4eadb;font-size:14px}.summary-card td:nth-child(2){font-weight:600}.summary-card td:first-child{width:60px;text-align:center}.summary-card td:nth-child(3),.summary-card td:nth-child(4){text-align:center}.summary-card tr.winner td{background:#f8e9b9;color:#775820}.summary-card #summary-restart{margin-top:18px}
+.fixed-duration{font-size:11px;align-self:center;color:#7d8d6b}
+@media(orientation:landscape) and (max-height:650px){.student-view #question-panel{max-height:none;overflow:visible}.summary-card table th,.summary-card table td{padding:7px 12px}.summary-card>p{margin:5px 0 10px}.summary-card h1{margin:7px 0}.summary-card #summary-restart{margin-top:10px;min-height:35px;padding:8px 15px}#summary-overlay{padding:12px}.summary-card td{font-size:12px}#teacher-hud{padding:8px 12px;right:115px}}
+@media(orientation:portrait){.student-view #question-panel{max-height:none;overflow:visible}#teacher-hud{flex-wrap:wrap;right:14px;top:calc(var(--question-space,0px) + 65px)}.summary-card td,.summary-card th{padding:9px 7px;font-size:11px}}
+.student-view #play-status{top:auto;bottom:23px;transform:translateX(-50%);max-width:45%;font-size:12px;padding:10px 16px}
+.student-view.practice-mode #play-status{top:70px;bottom:auto;max-width:70%}
+
+#teacher-roster{position:relative;font-size:12px;flex-shrink:0}#teacher-roster summary{cursor:pointer;padding:12px;border:1px solid #cddbbd;border-radius:10px;background:#eff5e7}#teacher-roster #players-list{position:absolute;right:0;top:45px;width:min(390px,80vw);padding:12px;background:#fffdf1;box-shadow:0 8px 28px #25483433;border:1px solid #d6dfcd;border-radius:12px;max-height:55vh;overflow:auto}#teacher-roster .player-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #e4e9db}#teacher-roster .player-row strong{flex:1;overflow-wrap:anywhere}#teacher-roster .player-row small{font-size:10px}#teacher-roster button.kick-player{padding:6px 9px;min-height:34px;background:#fcebe5;color:#8a4537;white-space:nowrap}#teacher-hud{max-width:1020px;flex-wrap:wrap}
+
+#answer-feedback{position:absolute;left:50%;top:55%;transform:translate(-50%,-50%);z-index:15;width:min(370px,85vw);padding:22px 25px;border-radius:20px;border:2px solid #fff;box-shadow:0 10px 40px #203a3640;text-align:center;pointer-events:none;background:#fffdf1}#answer-feedback strong{display:block;font-size:24px}#answer-feedback span{display:block;font-size:14px;margin-top:10px;line-height:1.5}#answer-feedback.is-correct{background:#e7f5db;color:#2d693b}#answer-feedback.is-wrong{background:#fff0e5;color:#9a4a34}#teacher-hud #continue-match{background:#2e6749;color:#fff;border:0}
+
+/* Icon-only tools reserve a fixed area separate from the teacher toolbar. */
+.screen-tools{gap:8px;flex-wrap:nowrap;width:96px;justify-content:flex-end;box-sizing:border-box}
+.screen-tools button{box-sizing:border-box;flex:0 0 44px;min-width:44px;max-width:44px;width:44px;height:44px;min-height:44px;max-height:44px;padding:0;margin:0;line-height:1;overflow:hidden;white-space:nowrap;font-family:Arial,sans-serif;font-size:24px}
+#teacher-hud{right:128px;box-sizing:border-box;min-width:0}#teacher-hud>div{min-width:120px}#teacher-roster .result-time{font-size:10px;white-space:nowrap;font-variant-numeric:tabular-nums}#teacher-roster #players-list{width:min(470px,85vw)}.summary-card{max-width:850px}.summary-card td:last-child{white-space:nowrap;font-variant-numeric:tabular-nums}
+@media(orientation:portrait){#teacher-hud{right:14px;top:calc(var(--question-space,0px) + 65px)}}
+
+/* Teacher: fixed corner icons, a compact question beside them, lobby tools only. */
+.teacher-view .screen-tools{top:max(8px,env(safe-area-inset-top));z-index:32}
+.teacher-view.in-room #question-panel{top:max(8px,env(safe-area-inset-top));right:max(128px,calc(env(safe-area-inset-right) + 118px));left:max(10px,env(safe-area-inset-left));padding:10px 14px}
+.question-actions{display:flex;justify-content:flex-end;margin-top:8px;gap:8px}
+#continue-match{flex:0 0 auto;padding:9px 16px;min-height:40px;border:0;border-radius:10px;background:#2e6749;color:#fff;font:inherit;font-size:12px;cursor:pointer}
+.student-view #answer-feedback{left:max(16px,env(safe-area-inset-left));right:auto;top:calc(var(--question-space,0px) + 54px);bottom:auto;transform:none;width:auto;max-width:calc(100% - 32px);padding:7px 11px;border:1px solid #fff;border-radius:10px;box-shadow:0 2px 9px #203a361c;display:flex;align-items:center;gap:8px;pointer-events:none}
+.student-view #answer-feedback strong{font-size:12px;line-height:1.3;font-weight:700;white-space:nowrap}
+.student-view #answer-feedback span{font-size:11px;line-height:1.3;margin:0;font-variant-numeric:tabular-nums;white-space:nowrap}
+@media(max-width:699px){.teacher-view.in-room #question-panel{top:62px;right:max(10px,env(safe-area-inset-right))}}
+
+/* Multi-touch: the browser must not claim a two-finger gesture across controls. */
+.control-deck,.joystick-wrap,#joystick,#knob,.actions,.actions button,.actions button *{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.actions button.touch-pressed:not(:disabled){transform:translateY(4px);box-shadow:none}
+
+/* Floating movement pad: origin follows the first finger in the left play area. */
+#joystick-zone{position:absolute;left:0;top:var(--question-space,0px);bottom:0;width:46%;z-index:4;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+#joystick-zone .joystick-wrap{position:absolute;bottom:auto;margin:0;padding:0;touch-action:none;pointer-events:none}
+#joystick-zone .joystick-wrap>span{display:none}
+.control-deck .actions{margin-left:auto}
+.teacher-view #joystick-zone{display:none!important}
+
+.teacher-view .screen-tools{display:grid;grid-template-columns:44px 44px;gap:8px;width:96px}
+.teacher-view .screen-tools #finish-match{grid-column:1 / -1;width:96px;min-width:96px;max-width:96px;height:34px;min-height:34px;max-height:34px;padding:0 6px;border-radius:10px;font:600 11px system-ui,sans-serif;background:#fff0e9;color:#964d3a;border:1px solid #e6c9bb}
+@media(max-width:699px){.teacher-view.in-room #question-panel{top:104px}}
+
+#color-picker{border:0;padding:0;margin:16px 0 18px;min-width:0}#color-picker legend{font-size:12px;color:#526e4c;margin-bottom:10px}.color-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}#color-picker label.color-option{display:flex;flex-direction:column;align-items:center;gap:5px;margin:0;padding:7px 3px;position:relative;cursor:pointer;border:1px solid #dbe3cf;border-radius:10px;background:#f4f7ed}#color-picker input{position:absolute;width:1px;height:1px;opacity:0;padding:0;margin:0;pointer-events:none}.color-swatch{display:block;width:27px;height:27px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px #36513e22;position:relative}#color-picker small{font-size:9px;line-height:1.3;color:#536a4a}.color-option:has(input:checked){outline:2px solid #2e6749;background:#e7f0dc!important}.color-option:has(input:focus-visible){outline:3px solid #b98e32}.color-option.is-used{opacity:.45;cursor:not-allowed!important}.color-option.is-used .color-swatch::after{content:'×';position:absolute;inset:0;display:grid;place-items:center;color:white;font-size:24px;text-shadow:0 1px 2px #000}#color-note{font-size:10px!important;line-height:1.4!important;margin:8px 0 0!important;color:#77876c!important}
+
+/* V17: narrow always-on scoreboard strip along the RIGHT edge, only during rounds.
+ * Below screen tools, clear of the question area and the tablet's action buttons.
+ * No expand/collapse control; the list may scroll on very short screens.
+ */
+#scoreboard-board{
+ position:absolute;z-index:7;
+ right:max(4px,env(safe-area-inset-right));
+ top:calc(var(--question-space,0px) + 62px);
+ width:clamp(126px,14.5vw,175px);
+ max-height:calc(100% - var(--question-space,0px) - 82px);
+ display:flex;flex-direction:column;
+ overflow:hidden;pointer-events:none;
+ border:1px solid rgba(174,195,164,.75);border-radius:10px;
+ background:rgba(255,254,246,.88);color:#294e39;
+ box-shadow:0 2px 10px rgba(33,60,41,.13);
+ font:500 10px/1.2 system-ui,sans-serif;
+ box-sizing:border-box;
+}
+#scoreboard-board .scoreboard-heading{
+ display:flex;align-items:center;justify-content:space-between;gap:2px;
+ padding:6px 7px 5px;border-bottom:1px solid #e1e8d7;
+ font-size:10px;line-height:1.1;white-space:nowrap;
+}
+#scoreboard-board .scoreboard-heading strong{font-weight:800;letter-spacing:.15px}
+#scoreboard-board .scoreboard-heading small{font-size:9px;color:#738969;font-variant-numeric:tabular-nums}
+#scoreboard-list{margin:0;padding:3px 4px 5px;list-style:none;display:grid;gap:2px;min-width:0;min-height:0;overflow-y:auto;pointer-events:auto;touch-action:pan-y;overscroll-behavior:contain}
+#scoreboard-list .scoreboard-row{
+ display:flex;align-items:center;gap:3px;min-width:0;height:22px;
+ padding:2px 3px;border-radius:5px;background:rgba(235,242,227,.9);
+}
+#scoreboard-list .scoreboard-row.is-leader{background:#fff0c8}
+#scoreboard-list .scoreboard-row.is-self{outline:1px solid #5c9f6b;outline-offset:-1px}
+#scoreboard-list .scoreboard-rank{flex:none;min-width:13px;color:#758068;font-size:9px;font-weight:750;font-variant-numeric:tabular-nums}
+#scoreboard-list .scoreboard-dot{flex:none;width:7px;height:7px;border-radius:50%;border:1px solid #fff}
+#scoreboard-list strong{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:650}
+#scoreboard-list .scoreboard-points{flex:none;min-width:23px;text-align:right;font-weight:850;font-size:11px;white-space:nowrap;color:#1e6544;font-variant-numeric:tabular-nums}
+/* The teacher view has no action buttons, so it can show all eight teams. */
+.teacher-view #scoreboard-board{top:calc(var(--question-space,0px) + 61px)}
+/* Keep the lower-right touch controls completely unobstructed on student devices. */
+.student-view:not(.teacher-view) #scoreboard-board{
+ top:calc(var(--question-space,0px) + 62px);
+ width:clamp(120px,14.5vw,162px);
+ max-height:calc(100% - var(--question-space,0px) - 167px);
+}
+@media (orientation:landscape) and (max-height:650px){
+ #scoreboard-board{width:clamp(123px,13.7vw,153px)}
+ .student-view:not(.teacher-view) #scoreboard-board{width:clamp(120px,14vw,143px)}
+ #scoreboard-list .scoreboard-row{height:20px}
+ #scoreboard-list strong{font-size:9px}
+ #scoreboard-list .scoreboard-points{font-size:10px}
+}
+@media (orientation:landscape) and (max-height:550px){
+ #scoreboard-board .scoreboard-heading{padding:4px 6px 3px;font-size:9px}
+ #scoreboard-list{gap:1px;padding:2px 3px 3px}
+ #scoreboard-list .scoreboard-row{height:17px;padding:1px 2px}
+ #scoreboard-list .scoreboard-points{font-size:10px}
+}
+@media (orientation:portrait){
+ #scoreboard-board{width:clamp(112px,24vw,155px)}
+ .student-view:not(.teacher-view) #scoreboard-board{width:clamp(108px,23vw,145px)}
+}

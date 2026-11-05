@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createRoom,addPlayer,leavePlayer} from '../lib/farm/engine.mjs';
+import {COLORS,CHARACTER_COLORS} from '../public/play/colors.js';
+const room=()=>createRoom({code:'TESTAB',hostToken:'teacher',questions:[{text:'1?',options:['1','2','3','4'],correct:'A'}]},0);
+const join=(r,id,color,deviceId)=>addPlayer(r,{id,token:id,name:id,color,deviceId,clientId:id+'tab'},100);
+test('Exactly eight selectable colors are unique, and a requested free color is used',()=>{assert.equal(COLORS.length,8);assert.equal(new Set(COLORS).size,8);assert.ok(CHARACTER_COLORS.every(c=>c.label));const r=room(),p=join(r,'p',COLORS[5]);assert.equal(p.color,COLORS[5]);assert.throws(()=>join(r,'x','#ff0000'));assert.equal(r.players.length,1);});
+test('An occupied color is rejected and all eight players can have distinct selected colors',()=>{const r=room();join(r,'p',COLORS[2]);assert.throws(()=>join(r,'q',COLORS[2]),e=>e.status===409);assert.equal(r.players.length,1);for(const [i,c]of COLORS.entries())if(c!==COLORS[2])join(r,'p'+i,c);assert.equal(new Set(r.players.map(p=>p.color)).size,8);});
+test('Leaving releases a color; returning devices cannot duplicate a color that someone else took',()=>{const r=room();join(r,'p',COLORS[0],'device1');leavePlayer(r,'p','ptab',200);join(r,'q',COLORS[0],'device2');const restored=join(r,'p-new',undefined,'device1');assert.equal(restored.id,'p');assert.notEqual(restored.color,COLORS[0]);assert.equal(new Set(r.players.map(p=>p.color)).size,2);});
+test('Another tab on the same device reuses its current color and cannot create a second character',()=>{const r=room(),p=join(r,'p',COLORS[1],'device');const same=join(r,'other',COLORS[4],'device');assert.equal(same,p);assert.equal(same.color,COLORS[1]);assert.equal(r.players.length,1);});
