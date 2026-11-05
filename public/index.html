@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#00743b">
+<title>Nông trại tri thức · Phòng chơi trực tuyến</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2300743b'/%3E%3Ctext x='32' y='47' text-anchor='middle' font-size='44'%3E🌱%3C/text%3E%3C/svg%3E">
+<style>
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Arial,'Segoe UI',sans-serif}body{min-height:100svh;display:grid;place-items:center;background:#f5faef;color:#075c25}.stage{width:min(100vw,177.6833156svh);aspect-ratio:1672/941;position:relative;isolation:isolate;background:#f5faef}.scene{position:absolute;width:100%;height:100%;inset:0;z-index:-1;object-fit:fill;user-select:none;pointer-events:none}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.mobile-brand,.mobile-title{display:none}.join{position:absolute;left:21.42%;top:56.05%;width:57.6%;height:11.85%;display:grid;grid-template-columns:2.2fr 1fr;gap:1.8%;margin:0}.join input{width:100%;min-width:0;height:100%;border:clamp(2px,.25vw,4px) solid #98d66b;border-radius:clamp(14px,2.1vw,36px);background:#fff;color:#075c25;outline:0;font:500 clamp(16px,2.65vw,46px)/1 Arial,sans-serif;text-align:center;box-shadow:0 7px 12px #58a53b25}.join input::placeholder{color:#858585;opacity:1}.join input:focus{border-color:#168345;box-shadow:0 0 0 5px #16834525}.join input.has-value{letter-spacing:.18em;font-weight:700}.join button{height:100%;min-width:0;border:0;border-radius:clamp(14px,2.1vw,36px);background:linear-gradient(#009338,#008632);box-shadow:inset 0 -7px #006f2d,0 6px 12px #58a53b30;color:#fff;font:700 clamp(17px,2.9vw,50px)/1 Arial,sans-serif;cursor:pointer;text-shadow:0 2px #00612d55}.join button:hover{filter:brightness(1.07)}.join button:active{transform:translateY(2px)}.create{position:absolute;left:2.55%;top:86.15%;width:19.6%;height:8.9%;display:flex;align-items:center;justify-content:center;gap:.4em;border:clamp(2px,.3vw,5px) solid white;border-radius:999px;color:white;background:linear-gradient(#00873a,#006b2b);box-shadow:0 7px 13px #31672338;text-decoration:none;font-size:clamp(12px,1.95vw,34px);font-weight:700;white-space:nowrap}.create span{font-size:1.65em;line-height:.8;font-weight:500}.create:hover{filter:brightness(1.12)}a:focus-visible,button:focus-visible{outline:4px solid #ffd02b;outline-offset:5px}.error{position:absolute;top:69%;left:21.42%;margin:0;color:#b33420;font-size:clamp(12px,1.2vw,20px);background:#fff9e8;border-radius:8px;padding:.4em .7em}.error:empty{display:none}
+@media (orientation:portrait) and (max-width:800px){body{display:block}.stage{width:100%;min-height:100svh;aspect-ratio:auto;display:flex;flex-direction:column;align-items:center;padding:0 22px 130px;background:radial-gradient(ellipse at 50% 100%,#b7e87e 0,transparent 55%),#f7fbf1;overflow:hidden}.scene{display:none}.mobile-brand{display:flex;align-items:center;justify-content:center;width:calc(100% + 44px);height:92px;flex-shrink:0;background:#00743b;color:#fff;font-size:18px;font-weight:700;letter-spacing:.02em}.mobile-title{display:block;text-align:center;margin:12svh 0 32px;font-size:clamp(30px,8.2vw,58px);line-height:1.15;font-weight:900}.mobile-title span{display:block;font-size:76px;margin-bottom:20px}.join{position:static;width:100%;height:auto;display:flex;flex-direction:column;gap:14px}.join input{height:68px;border-radius:20px;font-size:21px}.join button{height:62px;border-radius:20px;font-size:26px}.create{left:22px;top:auto;bottom:30px;width:auto;height:55px;padding:0 20px;border:3px solid #fff;font-size:20px}.error{position:static;align-self:stretch;margin-top:15px;font-size:15px}}
+@media (prefers-reduced-motion:no-preference){button,a{transition:filter .15s,transform .15s}}
+</style>
+</head>
+<body>
+<main class="stage" aria-labelledby="page-title">
+<img class="scene" src="/assets/trang-chu-nong-trai.png" alt="" fetchpriority="high" width="1672" height="941">
+<div class="mobile-brand" aria-hidden="true">🌱 &nbsp; PHÒNG CHƠI TRỰC TUYẾN</div>
+<h1 id="page-title" class="sr-only">Nông trại tri thức</h1>
+<div class="mobile-title" aria-hidden="true"><span>🌳 🎮</span>NÔNG TRẠI<br>TRI THỨC</div>
+<form class="join" action="/play/student.html" method="get" aria-label="Tham gia phòng chơi">
+<label class="sr-only" for="room">Mã phòng gồm 6 chữ số</label>
+<input id="room" name="room" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" minlength="6" placeholder="Nhập mã phòng 6 chữ số" autocomplete="off" spellcheck="false" required aria-describedby="room-error">
+<button type="submit">Tham gia</button>
+</form>
+<p id="room-error" class="error" role="alert"></p>
+<a class="create" href="/play/teacher.html"><span aria-hidden="true">+</span> Tạo phòng chơi</a>
+</main>
+<script>
+const input=document.getElementById('room'),error=document.getElementById('room-error');
+input.addEventListener('input',()=>{input.value=input.value.replace(/\D/g,'').slice(0,6);input.classList.toggle('has-value',!!input.value);input.setCustomValidity('');error.textContent='';});
+input.addEventListener('invalid',()=>{input.setCustomValidity('Vui lòng nhập đủ 6 chữ số của mã phòng.');error.textContent='Vui lòng nhập đủ 6 chữ số của mã phòng.';});
+</script>
+</body>
+</html>
