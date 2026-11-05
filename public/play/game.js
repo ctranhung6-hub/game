@@ -155,13 +155,15 @@ function resize(){
 new ResizeObserver(resize).observe(container);resize();
 // Camera magnification changes presentation only; shared collision geometry stays exact.
 let overview=false,panX=0,panZ=0,drag=null;
-const zoomButton=document.createElement('button');zoomButton.id='map-overview';zoomButton.type='button';
-Object.assign(zoomButton.style,{position:'absolute',left:'50%',bottom:'22px',transform:'translateX(-50%)',zIndex:'7',padding:'10px 14px',borderRadius:'12px',border:'1px solid #bed8a8',background:'#fffef4ee',color:'#285731',fontSize:'13px',fontWeight:'700',cursor:'pointer'});
-zoomButton.textContent='⛶ Toàn bản đồ';zoomButton.setAttribute('aria-pressed','false');
-// Giáo viên luôn xem toàn bản đồ cố định; học sinh vẫn dùng nút zoom như cũ.
-if(teacherMapFixed){zoomButton.hidden=true;zoomButton.style.display='none';}
-zoomButton.onclick=()=>{if(teacherMapFixed)return;overview=!overview;camera.zoom=overview?1:2;camera.updateProjectionMatrix();zoomButton.textContent=overview?'＋ Phóng to 100%':'⛶ Toàn bản đồ';zoomButton.setAttribute('aria-pressed',String(overview));};
-$('.game').append(zoomButton);
+// Chỉ tạo nút thay đổi góc nhìn trên màn hình học sinh.
+// Giáo viên luôn thấy toàn bộ bản đồ, không có nút "Phóng to 100%" / "Toàn bản đồ".
+if(!teacherMapFixed){
+ const zoomButton=document.createElement('button');zoomButton.id='map-overview';zoomButton.type='button';
+ Object.assign(zoomButton.style,{position:'absolute',left:'50%',bottom:'22px',transform:'translateX(-50%)',zIndex:'7',padding:'10px 14px',borderRadius:'12px',border:'1px solid #bed8a8',background:'#fffef4ee',color:'#285731',fontSize:'13px',fontWeight:'700',cursor:'pointer'});
+ zoomButton.textContent='⛶ Toàn bản đồ';zoomButton.setAttribute('aria-pressed','false');
+ zoomButton.onclick=()=>{overview=!overview;camera.zoom=overview?1:2;camera.updateProjectionMatrix();zoomButton.textContent=overview?'＋ Phóng to 100%':'⛶ Toàn bản đồ';zoomButton.setAttribute('aria-pressed',String(overview));};
+ $('.game').append(zoomButton);
+}
 renderer.domElement.style.touchAction='none';
 renderer.domElement.addEventListener('pointerdown',e=>{if(teacherMapFixed||!net.isHost()||overview)return;drag={id:e.pointerId,x:e.clientX,y:e.clientY};renderer.domElement.setPointerCapture(e.pointerId);});
 renderer.domElement.addEventListener('pointermove',e=>{if(!drag||drag.id!==e.pointerId)return;const w=container.clientWidth,h=container.clientHeight;panX=THREE.MathUtils.clamp(panX-(e.clientX-drag.x)*(camera.right-camera.left)/camera.zoom/w,MAP.minX,MAP.maxX);panZ=THREE.MathUtils.clamp(panZ-(e.clientY-drag.y)*(camera.top-camera.bottom)/camera.zoom/h/.777,MAP.minZ,MAP.maxZ);drag.x=e.clientX;drag.y=e.clientY;});
