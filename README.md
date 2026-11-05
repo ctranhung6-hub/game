@@ -1,5 +1,4 @@
-# Nông Trại Tri Thức — Bản 21 thời gian thực
-
+# Nông Trại Tri Thức
 Bộ này gồm giao diện Vercel và backend WebSocket chạy riêng. Chỉ tải lên Vercel là CHƯA đủ để chơi online. Không cần Redis ở bản này.
 
 ## 1. Tải lên GitHub
