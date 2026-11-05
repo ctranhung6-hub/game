@@ -12,7 +12,7 @@ let renderer;
 try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});}catch(e){$('#load').textContent='Thiết bị chưa bật WebGL. Hãy thử trình duyệt có hỗ trợ 3D.';throw e;}
 renderer.setPixelRatio(GRAPHICS.pixelRatio);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;container.appendChild(renderer.domElement);
 const scene=new THREE.Scene();scene.background=new THREE.Color('#c9dfca');scene.fog=new THREE.Fog('#c9dfca',38,65);
-const camera=new THREE.OrthographicCamera(-12,12,9,-9,.1,100);camera.position.set(0,21,17);camera.lookAt(0,0,0);
+const camera=new THREE.OrthographicCamera(-12,12,9,-9,.1,100);camera.position.set(0,21,17);camera.lookAt(0,0,0);camera.zoom=2;camera.updateProjectionMatrix();
 scene.add(new THREE.HemisphereLight('#fff7df','#86a781',2.5));const sun=new THREE.DirectionalLight('#fff1d2',3.4);sun.position.set(-8,18,9);sun.castShadow=true;sun.shadow.mapSize.set(GRAPHICS.shadowMapSize,GRAPHICS.shadowMapSize);Object.assign(sun.shadow.camera,{left:-30,right:30,top:28,bottom:-28,near:1,far:50});sun.shadow.normalBias=.035;sun.shadow.bias=-.0002;scene.add(sun);
 // Bề mặt cỏ chi tiết cao: tạo một lần và dùng lại, không tăng số đối tượng 3D.
 function createGrassTexture(){
@@ -115,13 +115,30 @@ touchControls=bindGameControls({joystick:$('#joystick'),knob:$('#knob'),joystick
 $('#reset').onclick=()=>{clearInput();anim=null;holding=null;heldAnchor.clear();actor.position.set(spawnPoint(0).x,0,spawnPoint(0).z);actor.rotation.y=0;done={move:false,pick:false,drop:false};moved=0;for(const li of document.querySelectorAll('.tasks li')){li.classList.remove('done');li.querySelector('i').textContent='○'}$('#completed').hidden=true;for(const d of dropped)world.remove(d.g);dropped=[];toast('Nouvelle aventure!'.replace('Nouvelle aventure!','Bắt đầu một vòng khám phá mới!'));updateUI()};
 $('#help').onclick=()=>{clearInput();$('#guide').showModal()};$('#close-guide').onclick=$('#start').onclick=()=>$('#guide').close();
 function resize(){const w=container.clientWidth,h=container.clientHeight;renderer.setSize(w,h);const aspect=w/h;const view=Math.max(27.8,50/aspect);camera.left=-view*aspect/2;camera.right=view*aspect/2;camera.top=view/2;camera.bottom=-view/2;camera.updateProjectionMatrix();}new ResizeObserver(resize).observe(container);resize();
+// Camera magnification changes presentation only; shared collision geometry stays exact.
+let overview=false,panX=0,panZ=0,drag=null;
+const zoomButton=document.createElement('button');zoomButton.id='map-overview';zoomButton.type='button';
+Object.assign(zoomButton.style,{position:'absolute',left:'50%',bottom:'22px',transform:'translateX(-50%)',zIndex:'7',padding:'10px 14px',borderRadius:'12px',border:'1px solid #bed8a8',background:'#fffef4ee',color:'#285731',fontSize:'13px',fontWeight:'700',cursor:'pointer'});
+zoomButton.textContent='⛶ Toàn bản đồ';zoomButton.setAttribute('aria-pressed','false');
+zoomButton.onclick=()=>{overview=!overview;camera.zoom=overview?1:2;camera.updateProjectionMatrix();zoomButton.textContent=overview?'＋ Phóng to 100%':'⛶ Toàn bản đồ';zoomButton.setAttribute('aria-pressed',String(overview));};
+$('.game').append(zoomButton);
+renderer.domElement.style.touchAction='none';
+renderer.domElement.addEventListener('pointerdown',e=>{if(!net.isHost()||overview)return;drag={id:e.pointerId,x:e.clientX,y:e.clientY};renderer.domElement.setPointerCapture(e.pointerId);});
+renderer.domElement.addEventListener('pointermove',e=>{if(!drag||drag.id!==e.pointerId)return;const w=container.clientWidth,h=container.clientHeight;panX=THREE.MathUtils.clamp(panX-(e.clientX-drag.x)*(camera.right-camera.left)/camera.zoom/w,MAP.minX,MAP.maxX);panZ=THREE.MathUtils.clamp(panZ-(e.clientY-drag.y)*(camera.top-camera.bottom)/camera.zoom/h/.777,MAP.minZ,MAP.maxZ);drag.x=e.clientX;drag.y=e.clientY;});
+const endPan=e=>{if(drag?.id===e.pointerId)drag=null;};renderer.domElement.addEventListener('pointerup',endPan);renderer.domElement.addEventListener('pointercancel',endPan);
+function updateCamera(){
+ let x=0,z=0;
+ if(!overview){if(net.isHost()){x=panX;z=panZ;}else{x=actor.position.x;z=actor.position.z;}}
+ camera.position.set(x,21,z+17);camera.lookAt(x,0,z);
+}
+window.addEventListener('farm-left',()=>{panX=panZ=0;});
 const clock=new THREE.Clock();let total=0;
 function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.07);total+=dt;let dx=0,dz=0,speed=0;if(!net.active()&&!$('#guide').open){dx=joy.x+Number(keys.has('d')||keys.has('arrowright'))-Number(keys.has('a')||keys.has('arrowleft'));dz=joy.y+Number(keys.has('s')||keys.has('arrowdown'))-Number(keys.has('w')||keys.has('arrowup'));const len=Math.hypot(dx,dz);if(len>.08){speed=Math.min(1,len);dx/=len;dz/=len;actor.position.x=THREE.MathUtils.clamp(actor.position.x+dx*SPEED*speed*dt,MAP.minX,MAP.maxX);actor.position.z=THREE.MathUtils.clamp(actor.position.z+dz*SPEED*speed*dt,MAP.minZ,MAP.maxZ);const target=Math.atan2(dx,dz);let delta=Math.atan2(Math.sin(target-actor.rotation.y),Math.cos(target-actor.rotation.y));actor.rotation.y+=delta*Math.min(1,dt*14);moved+=dt*speed;if(moved>.6&&!done.move)task('move')}}
 walkPhase+=dt*11*speed;legs.forEach((l,i)=>l.rotation.x=Math.sin(walkPhase+i*Math.PI)*.62*speed);arms.forEach((a,i)=>{a.rotation.x=holding?-1.02:Math.sin(walkPhase+i*Math.PI+Math.PI)*.5*speed;a.rotation.z=holding?(i===0?-.22:.22):0});body.position.y=Math.abs(Math.sin(walkPhase))*speed*.045+Math.sin(total*2)*.012;body.rotation.x=0;
 if(net.active()&&net.state()){const i=net.input(),key=i.x.toFixed(2)+','+i.z.toFixed(2);if(key!==lastDirection){lastDirection=key;net.inputChanged();}renderNetwork(dt,total);}
 if(!net.active()&&anim){anim.t+=dt;const duration=(anim.kind==='pick'?PICKUP_MS:DROP_MS)/1000,p=Math.min(1,anim.t/duration),bend=Math.sin(p*Math.PI);body.rotation.x=bend*(speed?.15:.3);body.position.y-=bend*.05;arms.forEach(a=>a.rotation.x=-bend*1.35);if(p>.52&&!anim.applied){anim.applied=true;if(anim.kind==='pick'){holding={letter:anim.b.letter,color:anim.b.fruitColor};const f=fruit(heldAnchor,0,0,0,holding.color,1.2);const badge=label(holding.letter,'#456046');badge.position.set(0,.15,.32);badge.scale.set(.32,.22,1);f.add(badge);task('pick');toast('Đã lấy quả '+holding.letter+'! Thử mang đi rồi thả nhé.')}else{const f=fruit(world,actor.position.x+Math.sin(actor.rotation.y)*.65,.24,actor.position.z+Math.cos(actor.rotation.y)*.65,holding.color,1);dropped.push({g:f,t:1.1});heldAnchor.clear();holding=null;task('drop');toast(Object.values(done).every(Boolean)?'Hoàn thành sân tập! Thầy có thể thử lại các giỏ khác.':'Đã thả quả! Bạn có thể chọn một giỏ khác.')}}if(p>=1)anim=null;}
 nearest=null;let min=1.6;for(const b of baskets){const dist=Math.hypot(b.x-actor.position.x,b.z-actor.position.z);if(dist<min){min=dist;nearest=b}b.sign.position.y=1.9+Math.sin(total*1.8)*.035;}for(const b of baskets)b.ring.material.opacity=b===nearest&&!(net.active()?net.self()?.held:holding)&&!net.isHost()?.9:0;
-for(const d of dropped){d.t-=dt;d.g.scale.setScalar(Math.max(0,Math.min(1,d.t*3)));if(d.t<=0)world.remove(d.g)}dropped=dropped.filter(d=>d.t>0);shadow.visible=!net.active();avatarLabel.visible=!net.active();shadow.position.set(actor.position.x,.035,actor.position.z);avatarLabel.position.set(actor.position.x,2.78,actor.position.z);if(toastTime>0){toastTime-=dt;if(toastTime<=0)$('#toast').classList.remove('show')}updateUI();renderer.render(scene,camera);}
+for(const d of dropped){d.t-=dt;d.g.scale.setScalar(Math.max(0,Math.min(1,d.t*3)));if(d.t<=0)world.remove(d.g)}dropped=dropped.filter(d=>d.t>0);shadow.visible=!net.active();avatarLabel.visible=!net.active();shadow.position.set(actor.position.x,.035,actor.position.z);avatarLabel.position.set(actor.position.x,2.78,actor.position.z);if(toastTime>0){toastTime-=dt;if(toastTime<=0)$('#toast').classList.remove('show')}updateUI();updateCamera();renderer.render(scene,camera);}
 
 // Visible safe delivery zone. Positions and fruit ownership come from the server.
 const delivery=new THREE.Group();world.add(delivery);delivery.visible=false;
