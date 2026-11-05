@@ -8,11 +8,13 @@ import { PredictedMotion,SPEED } from './motion.js?v=15';
 import {PICKUP_MS,DROP_MS} from './actions.js?v=15';
 import {MAP,BASKETS,DELIVERY,JUICER,spawnPoint,insideDelivery,boundedPosition} from './world.js';
 const $=s=>document.querySelector(s),container=$('#scene');
+// Mỗi giao diện có một mức hiển thị cố định, không có nút đổi kích thước.
+const isTeacherView=document.body.dataset.role==='teacher';
 let renderer;
 try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});}catch(e){$('#load').textContent='Thiết bị chưa bật WebGL. Hãy thử trình duyệt có hỗ trợ 3D.';throw e;}
 renderer.setPixelRatio(GRAPHICS.pixelRatio);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;container.appendChild(renderer.domElement);
 const scene=new THREE.Scene();scene.background=new THREE.Color('#c9dfca');scene.fog=new THREE.Fog('#c9dfca',38,65);
-const camera=new THREE.OrthographicCamera(-12,12,9,-9,.1,100);camera.position.set(0,21,17);camera.lookAt(0,0,0);camera.zoom=2;camera.updateProjectionMatrix();
+const camera=new THREE.OrthographicCamera(-12,12,9,-9,.1,100);camera.position.set(0,21,17);camera.lookAt(0,0,0);camera.zoom=isTeacherView?1:2;camera.updateProjectionMatrix();
 scene.add(new THREE.HemisphereLight('#fff7df','#86a781',2.5));const sun=new THREE.DirectionalLight('#fff1d2',3.4);sun.position.set(-8,18,9);sun.castShadow=true;sun.shadow.mapSize.set(GRAPHICS.shadowMapSize,GRAPHICS.shadowMapSize);Object.assign(sun.shadow.camera,{left:-30,right:30,top:28,bottom:-28,near:1,far:50});sun.shadow.normalBias=.035;sun.shadow.bias=-.0002;scene.add(sun);
 // Bề mặt cỏ chi tiết cao: tạo một lần và dùng lại, không tăng số đối tượng 3D.
 function createGrassTexture(){
@@ -115,23 +117,14 @@ touchControls=bindGameControls({joystick:$('#joystick'),knob:$('#knob'),joystick
 $('#reset').onclick=()=>{clearInput();anim=null;holding=null;heldAnchor.clear();actor.position.set(spawnPoint(0).x,0,spawnPoint(0).z);actor.rotation.y=0;done={move:false,pick:false,drop:false};moved=0;for(const li of document.querySelectorAll('.tasks li')){li.classList.remove('done');li.querySelector('i').textContent='○'}$('#completed').hidden=true;for(const d of dropped)world.remove(d.g);dropped=[];toast('Nouvelle aventure!'.replace('Nouvelle aventure!','Bắt đầu một vòng khám phá mới!'));updateUI()};
 $('#help').onclick=()=>{clearInput();$('#guide').showModal()};$('#close-guide').onclick=$('#start').onclick=()=>$('#guide').close();
 function resize(){const w=container.clientWidth,h=container.clientHeight;renderer.setSize(w,h);const aspect=w/h;const view=Math.max(27.8,50/aspect);camera.left=-view*aspect/2;camera.right=view*aspect/2;camera.top=view/2;camera.bottom=-view/2;camera.updateProjectionMatrix();}new ResizeObserver(resize).observe(container);resize();
-// Camera magnification changes presentation only; shared collision geometry stays exact.
-let overview=false,panX=0,panZ=0,drag=null;
-const zoomButton=document.createElement('button');zoomButton.id='map-overview';zoomButton.type='button';
-Object.assign(zoomButton.style,{position:'absolute',left:'50%',bottom:'22px',transform:'translateX(-50%)',zIndex:'7',padding:'10px 14px',borderRadius:'12px',border:'1px solid #bed8a8',background:'#fffef4ee',color:'#285731',fontSize:'13px',fontWeight:'700',cursor:'pointer'});
-zoomButton.textContent='⛶ Toàn bản đồ';zoomButton.setAttribute('aria-pressed','false');
-zoomButton.onclick=()=>{overview=!overview;camera.zoom=overview?1:2;camera.updateProjectionMatrix();zoomButton.textContent=overview?'＋ Phóng to 100%':'⛶ Toàn bản đồ';zoomButton.setAttribute('aria-pressed',String(overview));};
-$('.game').append(zoomButton);
-renderer.domElement.style.touchAction='none';
-renderer.domElement.addEventListener('pointerdown',e=>{if(!net.isHost()||overview)return;drag={id:e.pointerId,x:e.clientX,y:e.clientY};renderer.domElement.setPointerCapture(e.pointerId);});
-renderer.domElement.addEventListener('pointermove',e=>{if(!drag||drag.id!==e.pointerId)return;const w=container.clientWidth,h=container.clientHeight;panX=THREE.MathUtils.clamp(panX-(e.clientX-drag.x)*(camera.right-camera.left)/camera.zoom/w,MAP.minX,MAP.maxX);panZ=THREE.MathUtils.clamp(panZ-(e.clientY-drag.y)*(camera.top-camera.bottom)/camera.zoom/h/.777,MAP.minZ,MAP.maxZ);drag.x=e.clientX;drag.y=e.clientY;});
-const endPan=e=>{if(drag?.id===e.pointerId)drag=null;};renderer.domElement.addEventListener('pointerup',endPan);renderer.domElement.addEventListener('pointercancel',endPan);
+// Giáo viên luôn xem trọn bản đồ ở tỉ lệ thường; học sinh luôn xem bản đồ phóng lớn.
+// Không tạo nút Toàn bản đồ/Phóng to 100% và không cho phép kéo bản đồ của giáo viên.
 function updateCamera(){
- let x=0,z=0;
- if(!overview){if(net.isHost()){x=panX;z=panZ;}else{x=actor.position.x;z=actor.position.z;}}
- camera.position.set(x,21,z+17);camera.lookAt(x,0,z);
+ const x=isTeacherView?0:actor.position.x;
+ const z=isTeacherView?0:actor.position.z;
+ camera.position.set(x,21,z+17);
+ camera.lookAt(x,0,z);
 }
-window.addEventListener('farm-left',()=>{panX=panZ=0;});
 const clock=new THREE.Clock();let total=0;
 function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.07);total+=dt;let dx=0,dz=0,speed=0;if(!net.active()&&!$('#guide').open){dx=joy.x+Number(keys.has('d')||keys.has('arrowright'))-Number(keys.has('a')||keys.has('arrowleft'));dz=joy.y+Number(keys.has('s')||keys.has('arrowdown'))-Number(keys.has('w')||keys.has('arrowup'));const len=Math.hypot(dx,dz);if(len>.08){speed=Math.min(1,len);dx/=len;dz/=len;actor.position.x=THREE.MathUtils.clamp(actor.position.x+dx*SPEED*speed*dt,MAP.minX,MAP.maxX);actor.position.z=THREE.MathUtils.clamp(actor.position.z+dz*SPEED*speed*dt,MAP.minZ,MAP.maxZ);const target=Math.atan2(dx,dz);let delta=Math.atan2(Math.sin(target-actor.rotation.y),Math.cos(target-actor.rotation.y));actor.rotation.y+=delta*Math.min(1,dt*14);moved+=dt*speed;if(moved>.6&&!done.move)task('move')}}
 walkPhase+=dt*11*speed;legs.forEach((l,i)=>l.rotation.x=Math.sin(walkPhase+i*Math.PI)*.62*speed);arms.forEach((a,i)=>{a.rotation.x=holding?-1.02:Math.sin(walkPhase+i*Math.PI+Math.PI)*.5*speed;a.rotation.z=holding?(i===0?-.22:.22):0});body.position.y=Math.abs(Math.sin(walkPhase))*speed*.045+Math.sin(total*2)*.012;body.rotation.x=0;
