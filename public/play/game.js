@@ -8,6 +8,8 @@ import { PredictedMotion,SPEED } from './motion.js?v=15';
 import {PICKUP_MS,DROP_MS} from './actions.js?v=15';
 import {MAP,BASKETS,DELIVERY,JUICER,spawnPoint,insideDelivery,boundedPosition} from './world.js';
 const $=s=>document.querySelector(s),container=$('#scene');
+// Chỉ thay đổi giao diện màn hình giáo viên. Màn hình học sinh giữ nguyên.
+const teacherMapFixed=document.body.dataset.role==='teacher';
 let renderer;
 try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});}catch(e){$('#load').textContent='Thiết bị chưa bật WebGL. Hãy thử trình duyệt có hỗ trợ 3D.';throw e;}
 renderer.setPixelRatio(GRAPHICS.pixelRatio);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;container.appendChild(renderer.domElement);
@@ -114,19 +116,64 @@ const joystickZone=document.createElement('div');joystickZone.id='joystick-zone'
 touchControls=bindGameControls({joystick:$('#joystick'),knob:$('#knob'),joystickZone,joystickWrap,interactButton:$('#interact'),bumpButton:$('#bump'),onInput:value=>{joy=value;},onInteract:()=>{updateUI();interact();},onBump:()=>{updateUI();bump();}});
 $('#reset').onclick=()=>{clearInput();anim=null;holding=null;heldAnchor.clear();actor.position.set(spawnPoint(0).x,0,spawnPoint(0).z);actor.rotation.y=0;done={move:false,pick:false,drop:false};moved=0;for(const li of document.querySelectorAll('.tasks li')){li.classList.remove('done');li.querySelector('i').textContent='○'}$('#completed').hidden=true;for(const d of dropped)world.remove(d.g);dropped=[];toast('Nouvelle aventure!'.replace('Nouvelle aventure!','Bắt đầu một vòng khám phá mới!'));updateUI()};
 $('#help').onclick=()=>{clearInput();$('#guide').showModal()};$('#close-guide').onclick=$('#start').onclick=()=>$('#guide').close();
-function resize(){const w=container.clientWidth,h=container.clientHeight;renderer.setSize(w,h);const aspect=w/h;const view=Math.max(27.8,50/aspect);camera.left=-view*aspect/2;camera.right=view*aspect/2;camera.top=view/2;camera.bottom=-view/2;camera.updateProjectionMatrix();}new ResizeObserver(resize).observe(container);resize();
+// Màn hình giáo viên: dành sẵn một vùng riêng cho bản đồ ngay từ phòng chờ.
+// Phần câu hỏi có thể cao/thấp theo nội dung nhưng không làm co giãn hoặc đẩy bản đồ.
+// Chỉ áp dụng cho trang có data-role="teacher"; không sửa HTML/CSS của học sinh.
+if(teacherMapFixed){
+ const game=$('.game');
+ if(getComputedStyle(game).position==='static')game.style.position='relative';
+ for(const [property,value] of [
+  ['position','absolute'],['inset','auto 0 0 0'],['height','58%'],
+  ['width','100%'],['max-height','58dvh'],['min-height','0'],
+  ['box-sizing','border-box'],['transform','none'],['flex','none']
+ ])container.style.setProperty(property,value,'important');
+}
+// Tính khung bao thực tế một lần để cả bốn giỏ, hàng rào và máy ép đều nhìn thấy.
+const teacherMapBounds=teacherMapFixed?new THREE.Box3().setFromObject(world):null;
+const teacherMapCenter=teacherMapFixed?teacherMapBounds.getCenter(new THREE.Vector3()):null;
+const teacherMapSize=teacherMapFixed?teacherMapBounds.getSize(new THREE.Vector3()):null;
+function resize(){
+ const w=Math.max(1,container.clientWidth),h=Math.max(1,container.clientHeight);
+ renderer.setSize(w,h);
+ const aspect=w/h;
+ if(teacherMapFixed){
+  // Góc quay giữ nguyên; chỉ tính toán lại khung nhìn khi kích thước cửa sổ thay đổi.
+  const distance=Math.hypot(21,17);
+  const verticalSize=teacherMapSize.z*21/distance+teacherMapSize.y*17/distance;
+  const view=Math.max(verticalSize*1.18,teacherMapSize.x*1.12/aspect);
+  camera.left=-view*aspect/2;camera.right=view*aspect/2;
+  camera.top=view/2;camera.bottom=-view/2;
+  camera.zoom=1;
+ }else{
+  // Giữ NGUYÊN camera/zoom của học sinh.
+  const view=Math.max(27.8,50/aspect);
+  camera.left=-view*aspect/2;camera.right=view*aspect/2;
+  camera.top=view/2;camera.bottom=-view/2;
+ }
+ camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(container);resize();
 // Camera magnification changes presentation only; shared collision geometry stays exact.
 let overview=false,panX=0,panZ=0,drag=null;
 const zoomButton=document.createElement('button');zoomButton.id='map-overview';zoomButton.type='button';
 Object.assign(zoomButton.style,{position:'absolute',left:'50%',bottom:'22px',transform:'translateX(-50%)',zIndex:'7',padding:'10px 14px',borderRadius:'12px',border:'1px solid #bed8a8',background:'#fffef4ee',color:'#285731',fontSize:'13px',fontWeight:'700',cursor:'pointer'});
 zoomButton.textContent='⛶ Toàn bản đồ';zoomButton.setAttribute('aria-pressed','false');
-zoomButton.onclick=()=>{overview=!overview;camera.zoom=overview?1:2;camera.updateProjectionMatrix();zoomButton.textContent=overview?'＋ Phóng to 100%':'⛶ Toàn bản đồ';zoomButton.setAttribute('aria-pressed',String(overview));};
+// Giáo viên luôn xem toàn bản đồ cố định; học sinh vẫn dùng nút zoom như cũ.
+if(teacherMapFixed){zoomButton.hidden=true;zoomButton.style.display='none';}
+zoomButton.onclick=()=>{if(teacherMapFixed)return;overview=!overview;camera.zoom=overview?1:2;camera.updateProjectionMatrix();zoomButton.textContent=overview?'＋ Phóng to 100%':'⛶ Toàn bản đồ';zoomButton.setAttribute('aria-pressed',String(overview));};
 $('.game').append(zoomButton);
 renderer.domElement.style.touchAction='none';
-renderer.domElement.addEventListener('pointerdown',e=>{if(!net.isHost()||overview)return;drag={id:e.pointerId,x:e.clientX,y:e.clientY};renderer.domElement.setPointerCapture(e.pointerId);});
+renderer.domElement.addEventListener('pointerdown',e=>{if(teacherMapFixed||!net.isHost()||overview)return;drag={id:e.pointerId,x:e.clientX,y:e.clientY};renderer.domElement.setPointerCapture(e.pointerId);});
 renderer.domElement.addEventListener('pointermove',e=>{if(!drag||drag.id!==e.pointerId)return;const w=container.clientWidth,h=container.clientHeight;panX=THREE.MathUtils.clamp(panX-(e.clientX-drag.x)*(camera.right-camera.left)/camera.zoom/w,MAP.minX,MAP.maxX);panZ=THREE.MathUtils.clamp(panZ-(e.clientY-drag.y)*(camera.top-camera.bottom)/camera.zoom/h/.777,MAP.minZ,MAP.maxZ);drag.x=e.clientX;drag.y=e.clientY;});
 const endPan=e=>{if(drag?.id===e.pointerId)drag=null;};renderer.domElement.addEventListener('pointerup',endPan);renderer.domElement.addEventListener('pointercancel',endPan);
 function updateCamera(){
+ if(teacherMapFixed){
+  // Vị trí camera không thay đổi giữa: phòng chờ → câu hỏi → công bố đáp án.
+  camera.position.set(teacherMapCenter.x,teacherMapCenter.y+21,teacherMapCenter.z+17);
+  camera.lookAt(teacherMapCenter);
+  return;
+ }
+ // Học sinh: giữ nguyên cơ chế camera đi theo nhân vật và nút toàn bản đồ.
  let x=0,z=0;
  if(!overview){if(net.isHost()){x=panX;z=panZ;}else{x=actor.position.x;z=actor.position.z;}}
  camera.position.set(x,21,z+17);camera.lookAt(x,0,z);
